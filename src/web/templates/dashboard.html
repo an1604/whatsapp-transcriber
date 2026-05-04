@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
+
+<div hx-get="/htmx/dashboard/stats"
+     hx-trigger="load, every 10s"
+     hx-swap="outerHTML">
+  <p class="text-muted">Loading stats…</p>
+</div>
+
+<div class="card">
+  <div class="card-header">Recent Videos</div>
+  <div id="recent-videos"
+       hx-get="/htmx/videos/recent"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    <p class="text-muted">Loading…</p>
+  </div>
+</div>
+{% endblock %}

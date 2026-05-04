@@ -1,0 +1,19 @@
+<tr>
+  <td><a href="/videos/{{ video.id }}">{{ video.id }}</a></td>
+  <td class="truncate mono">
+    <a href="/videos/{{ video.id }}" title="{{ video.canonical_url }}">{{ video.canonical_url | truncate(60) }}</a>
+  </td>
+  <td><span class="badge badge-platform">{{ video.platform }}</span></td>
+  <td>
+    {% if video.status == "complete" %}
+      <span class="badge badge-complete">complete</span>
+    {% elif video.status == "failed" %}
+      <span class="badge badge-failed">failed</span>
+    {% elif video.status == "discovered" %}
+      <span class="badge badge-discovered">queued</span>
+    {% else %}
+      <span class="badge badge-progress">{{ video.status }}</span>
+    {% endif %}
+  </td>
+  <td class="text-muted mono">{{ video.created_at[:16] if video.created_at else "—" }}</td>
+</tr>

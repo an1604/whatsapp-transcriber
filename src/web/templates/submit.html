@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Submit URL — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<h1 class="page-title">Submit URL</h1>
+
+<div style="max-width:560px">
+  <div class="card">
+    <div class="card-header">Manually queue a video</div>
+    <p class="text-muted" style="margin-bottom:20px;font-size:13px">
+      Paste a YouTube, Instagram, TikTok, or Facebook video URL. The URL will be canonicalized
+      and deduplicated — submitting the same video twice returns the existing record.
+    </p>
+
+    <form hx-post="/htmx/submit"
+          hx-target="#submit-result"
+          hx-swap="innerHTML"
+          hx-on::before-request="this.querySelector('.btn-primary').setAttribute('disabled','')">
+      <div class="form-group">
+        <label for="url">Video URL</label>
+        <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=…" required />
+      </div>
+      <div class="form-group">
+        <label for="source_group">Source group <span class="text-muted">(optional)</span></label>
+        <input type="text" id="source_group" name="source_group" placeholder="e.g. Community channel name" />
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="htmx-indicator">⏳</span>
+        Submit
+      </button>
+    </form>
+
+    <div id="submit-result" class="mt-4"></div>
+  </div>
+
+  <div class="card mt-4">
+    <div class="card-header">Supported platforms</div>
+    <ul style="padding-left:20px;color:var(--muted);font-size:13px;line-height:2">
+      <li>YouTube — <span class="mono">youtube.com/watch</span>, <span class="mono">youtu.be</span>, <span class="mono">youtube.com/shorts</span></li>
+      <li>Instagram — <span class="mono">instagram.com/reel</span>, <span class="mono">/p/</span>, <span class="mono">/tv/</span></li>
+      <li>TikTok — <span class="mono">tiktok.com/@user/video</span>, <span class="mono">vm.tiktok.com</span></li>
+      <li>Facebook — <span class="mono">facebook.com/reel</span>, <span class="mono">facebook.com/watch</span>, <span class="mono">fb.watch</span></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

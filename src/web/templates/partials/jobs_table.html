@@ -1,0 +1,36 @@
+{% if jobs %}
+<table>
+  <thead>
+    <tr>
+      <th>Job ID</th><th>Video</th><th>Type</th><th>Status</th><th>Started</th><th>Completed</th><th>Error</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for job in jobs %}
+    <tr>
+      <td>{{ job.id }}</td>
+      <td><a href="/videos/{{ job.video_id }}">#{{ job.video_id }}</a></td>
+      <td><span class="badge badge-platform">{{ job.job_type }}</span></td>
+      <td>
+        {% if job.status == "completed" %}
+          <span class="badge badge-complete">completed</span>
+        {% elif job.status == "failed" %}
+          <span class="badge badge-failed">failed</span>
+        {% elif job.status == "running" %}
+          <span class="badge badge-progress">running</span>
+        {% else %}
+          <span class="badge badge-discovered">{{ job.status }}</span>
+        {% endif %}
+      </td>
+      <td class="mono text-muted">{{ job.started_at[:19] if job.started_at else "—" }}</td>
+      <td class="mono text-muted">{{ job.completed_at[:19] if job.completed_at else "—" }}</td>
+      <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ job.error or '' }}">
+        {{ job.error or "—" }}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted" style="padding:20px 0">No jobs yet.</p>
+{% endif %}
