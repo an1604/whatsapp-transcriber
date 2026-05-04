@@ -17,9 +17,9 @@
 | 7 | HTMX + Jinja2 frontend | `feature/step-7-htmx-ui` | #7 | ✅ Merged to dev | 59 |
 | 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | #8 | ✅ Merged to dev | 70 |
 | 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | #9 | ✅ Merged to dev | 109 (Py) + 47 (JS) |
-| 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | — | ⬜ Pending | — |
+| 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | #10 | ✅ Merged to dev | 50 |
 
-**Total tests on dev: 752 (all passing) — 109 Python + 47 Node.js added in step 9**
+**Total tests on dev: 732 Python + 47 Node.js = 779 total (all passing) 🎉**
 
 ---
 
@@ -56,6 +56,22 @@
 - `src/web/routes/jobs.py` — `GET /api/jobs/video/{id}`, `GET /api/jobs/{id}`
 - `src/web/routes/dashboard.py` — `GET /api/dashboard` (aggregate counts)
 - `src/web/routes/submit.py` — `POST /api/submit` (manual URL, dedup-aware, 422 on bad URL)
+
+### Step 10 — Polish
+- `src/core/database.py` — `search_videos()` (LIKE across url/transcript/summary), `bulk_mark_audio_deleted()`, `get_disk_stats()`
+- `src/web/routes/videos.py` — `GET /api/videos/search`, `POST /api/videos/bulk-delete-audio`
+- `src/web/routes/dashboard.py` — extended with `videos_with_audio` + `videos_audio_deleted` fields
+- `src/web/routes/htmx.py` — HTMX search route + HTMX bulk-delete-audio route
+- `src/web/routes/pages.py` — `GET /settings`
+- Templates — search box, checkboxes, bulk-delete form, settings page, disk stats on dashboard
+
+### Step 9 — WhatsApp Node.js Sidecar
+- `whatsapp-sidecar/src/url_extractor.js` — regex URL extraction for all 4 platforms
+- `whatsapp-sidecar/src/pipeline_client.js` — fetch-based HTTP client to POST URLs to Python API
+- `whatsapp-sidecar/src/message_handler.js` — community ID filtering, URL extraction, submission
+- `whatsapp-sidecar/src/index.js` — WhatsApp Web.js client + Express health/status API
+- `src/whatsapp/sidecar_client.py` — async Python client (SidecarError / SidecarNotReadyError)
+- docker-compose.yml updated with `whatsapp-sidecar` service + `wa_session` volume
 
 ### Step 8 — Docker Compose
 - `Dockerfile` — multi-stage build: builder (pip wheels) + runtime (ffmpeg, app code)
