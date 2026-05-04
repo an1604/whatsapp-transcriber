@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whatsapp-transcriber"
+version = "0.1.0"
+description = "WhatsApp community video transcriber and summarizer"
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic>=2.5",
+    "pydantic-settings>=2.5",
+    "sqlalchemy>=2.0",
+    "aiosqlite>=0.19",
+    "pyyaml>=6.0",
+    "alembic>=1.13",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=4.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+omit = ["tests/*"]
