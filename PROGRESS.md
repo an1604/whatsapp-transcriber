@@ -16,10 +16,10 @@
 | 6 | FastAPI REST API | `feature/step-6-web-ui` | #6 | ✅ Merged to dev | 49 |
 | 7 | HTMX + Jinja2 frontend | `feature/step-7-htmx-ui` | #7 | ✅ Merged to dev | 59 |
 | 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | #8 | ✅ Merged to dev | 70 |
-| 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | — | ⬜ Pending | — |
+| 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | #9 | ✅ Merged to dev | 109 (Py) + 47 (JS) |
 | 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | — | ⬜ Pending | — |
 
-**Total tests on dev: 643 (all passing)**
+**Total tests on dev: 752 (all passing) — 109 Python + 47 Node.js added in step 9**
 
 ---
 

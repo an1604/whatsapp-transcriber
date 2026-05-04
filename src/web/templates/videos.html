@@ -6,6 +6,20 @@
   <a href="/submit" class="btn btn-primary">➕ Submit URL</a>
 </div>
 
+<!-- Search box -->
+<form style="margin-bottom:16px;display:flex;gap:8px">
+  <input id="search-q" name="q" type="search" placeholder="Search by URL, transcript, or summary…"
+         style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)"
+         hx-get="/htmx/videos/search"
+         hx-target="#video-table"
+         hx-trigger="input changed delay:400ms, search"
+         hx-include="#search-q">
+  <button type="button" class="btn"
+          hx-get="/htmx/videos/table?limit=25&offset=0"
+          hx-target="#video-table"
+          onclick="document.getElementById('search-q').value=''">Clear</button>
+</form>
+
 <div class="filters">
   <select id="filter-platform" name="platform"
           hx-get="/htmx/videos/table"
@@ -36,12 +50,23 @@
   </select>
 </div>
 
-<div class="card">
-  <div id="video-table"
-       hx-get="/htmx/videos/table?limit=25&offset=0{% if platform %}&platform={{ platform }}{% endif %}{% if status %}&status={{ status }}{% endif %}"
-       hx-trigger="load"
-       hx-swap="innerHTML">
-    <p class="text-muted">Loading…</p>
+<!-- Bulk delete audio form -->
+<form id="bulk-delete-form"
+      hx-post="/htmx/videos/bulk-delete-audio"
+      hx-target="#bulk-result"
+      hx-swap="innerHTML"
+      style="margin-bottom:8px">
+  <div class="card">
+    <div id="video-table"
+         hx-get="/htmx/videos/table?limit=25&offset=0{% if platform %}&platform={{ platform }}{% endif %}{% if status %}&status={{ status }}{% endif %}"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+      <p class="text-muted">Loading…</p>
+    </div>
   </div>
-</div>
+  <div style="margin-top:8px;display:flex;align-items:center;gap:12px">
+    <button type="submit" class="btn btn-danger">🗑 Delete audio for selected</button>
+    <span id="bulk-result"></span>
+  </div>
+</form>
 {% endblock %}

@@ -58,12 +58,15 @@ async def htmx_dashboard_stats(
     }
     in_progress = sum(status_counts.get(s.value, 0) for s in in_progress_statuses)
 
+    disk = await db.get_disk_stats(session)
     stats = {
         "total_videos": total,
         "complete": status_counts.get(VideoStatus.COMPLETE.value, 0),
         "failed": status_counts.get(VideoStatus.FAILED.value, 0),
         "in_progress": in_progress,
         "discovered": status_counts.get(VideoStatus.DISCOVERED.value, 0),
+        "videos_with_audio": disk["videos_with_audio"],
+        "videos_audio_deleted": disk["videos_audio_deleted"],
     }
     return templates.TemplateResponse(
         request, "partials/dashboard_stats.html", {"stats": stats}
@@ -185,6 +188,68 @@ async def htmx_jobs_for_video(
     jobs = [JobRead.model_validate(r).model_dump(mode="json") for r in rows]
     return templates.TemplateResponse(
         request, "partials/jobs_table.html", {"jobs": jobs}
+    )
+
+
+# ---------------------------------------------------------------------------
+# Search (videos page)
+# ---------------------------------------------------------------------------
+
+@router.get("/videos/search", response_class=HTMLResponse)
+async def htmx_search_videos(
+    request: Request,
+    q: Optional[str] = None,
+    limit: int = 25,
+    offset: int = 0,
+    session: AsyncSession = Depends(get_session),
+    db: Database = Depends(get_database),
+):
+    if not q or not q.strip():
+        return templates.TemplateResponse(
+            request,
+            "partials/video_table.html",
+            {"videos": [], "show_pagination": False, "limit": limit, "offset": 0, "q": ""},
+        )
+    if limit < 1 or limit > 200:
+        raise ValueError(f"limit must be between 1 and 200, got {limit}")
+    rows = await db.search_videos(session, q, limit=limit, offset=offset)
+    videos = [VideoRead.model_validate(r).model_dump(mode="json") for r in rows]
+    return templates.TemplateResponse(
+        request,
+        "partials/video_table.html",
+        {
+            "videos": videos,
+            "show_pagination": True,
+            "limit": limit,
+            "offset": offset,
+            "q": q,
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Bulk delete audio (videos page)
+# ---------------------------------------------------------------------------
+
+@router.post("/videos/bulk-delete-audio", response_class=HTMLResponse)
+async def htmx_bulk_delete_audio(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    db: Database = Depends(get_database),
+):
+    form = await request.form()
+    raw_ids = form.getlist("video_ids")
+    try:
+        video_ids = [int(v) for v in raw_ids if v]
+    except ValueError:
+        return HTMLResponse('<span class="badge badge-failed">Error: invalid video ID</span>', status_code=400)
+
+    if not video_ids:
+        return HTMLResponse('<span class="text-muted">No videos selected.</span>')
+
+    count = await db.bulk_mark_audio_deleted(session, video_ids)
+    return HTMLResponse(
+        f'<span class="badge badge-complete">{count} audio file(s) deleted.</span>'
     )
 
 

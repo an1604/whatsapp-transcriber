@@ -18,6 +18,8 @@ class DashboardStats(BaseModel):
     failed: int
     in_progress: int
     discovered: int
+    videos_with_audio: int = 0
+    videos_audio_deleted: int = 0
 
 
 @router.get("", response_model=DashboardStats)
@@ -47,10 +49,14 @@ async def get_dashboard_stats(
         status_counts.get(s.value, 0) for s in in_progress_statuses
     )
 
+    disk = await db.get_disk_stats(session)
+
     return DashboardStats(
         total_videos=total,
         complete=status_counts.get(VideoStatus.COMPLETE.value, 0),
         failed=status_counts.get(VideoStatus.FAILED.value, 0),
         in_progress=in_progress,
         discovered=status_counts.get(VideoStatus.DISCOVERED.value, 0),
+        videos_with_audio=disk["videos_with_audio"],
+        videos_audio_deleted=disk["videos_audio_deleted"],
     )
