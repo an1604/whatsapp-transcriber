@@ -18,8 +18,9 @@
 | 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | #8 | ✅ Merged to dev | 70 |
 | 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | #9 | ✅ Merged to dev | 109 (Py) + 47 (JS) |
 | 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | #10 | ✅ Merged to dev | 50 |
+| 11 | Inbox & manual processing | `feature/step-11-inbox` | #11 | ✅ Merged to dev | 95 |
 
-**Total tests on dev: 732 Python + 47 Node.js = 779 total (all passing) 🎉**
+**Total tests on dev: 827 Python + 47 Node.js = 874 total (all passing) 🎉**
 
 ---
 
