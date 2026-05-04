@@ -15,9 +15,9 @@
     <div class="stat-val">{{ stats.failed }}</div>
     <div class="stat-label">Failed</div>
   </div>
-  <div class="stat">
+  <div class="stat" style="cursor:pointer" onclick="window.location='/inbox'">
     <div class="stat-val">{{ stats.discovered }}</div>
-    <div class="stat-label">Queued</div>
+    <div class="stat-label"><a href="/inbox" style="color:inherit">Inbox</a></div>
   </div>
   <div class="stat">
     <div class="stat-val">{{ stats.videos_with_audio }}</div>

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Inbox — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center" style="margin-bottom:24px">
+  <h1 class="page-title" style="margin:0">Inbox</h1>
+  <span class="text-muted" style="font-size:13px">Videos from WhatsApp — choose which to process</span>
+</div>
+
+<div class="card">
+  <!-- Bulk actions toolbar -->
+  <form id="inbox-bulk-form"
+        style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <button type="submit"
+            class="btn btn-primary"
+            hx-post="/htmx/inbox/bulk-process"
+            hx-include="[name=video_ids]"
+            hx-target="#bulk-result"
+            hx-swap="innerHTML">&#9654; Process selected</button>
+    <button type="button"
+            class="btn btn-danger"
+            hx-post="/htmx/inbox/bulk-dismiss"
+            hx-include="[name=video_ids]"
+            hx-target="#bulk-result"
+            hx-swap="innerHTML"
+            hx-on::after-request="document.getElementById('inbox-table').dispatchEvent(new Event('reload'))">
+      &#x2715; Dismiss selected</button>
+    <span id="bulk-result"></span>
+  </form>
+
+  <!-- Auto-refreshing table -->
+  <div id="inbox-table"
+       hx-get="/htmx/inbox?limit=25&offset=0"
+       hx-trigger="load, every 10s, inbox-updated from:body"
+       hx-swap="innerHTML">
+    <p class="text-muted">Loading&hellip;</p>
+  </div>
+</div>
+{% endblock %}

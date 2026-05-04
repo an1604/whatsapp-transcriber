@@ -1,0 +1,25 @@
+<tr id="inbox-row-{{ video.id }}">
+  <td><input type="checkbox" name="video_ids" value="{{ video.id }}" form="inbox-bulk-form"></td>
+  <td><span class="badge badge-platform">{{ video.platform }}</span></td>
+  <td class="mono truncate">
+    <a href="/videos/{{ video.id }}" title="{{ video.canonical_url }}">
+      {{ video.canonical_url[:70] }}{% if video.canonical_url | length > 70 %}…{% endif %}
+    </a>
+  </td>
+  <td class="text-muted">{{ video.source_group or "—" }}</td>
+  <td class="text-muted">{{ video.created_at[:16] | replace("T", " ") }}</td>
+  <td style="white-space:nowrap">
+    {% if queued %}
+      <span class="badge badge-progress">Queued</span>
+    {% else %}
+      <button class="btn btn-primary" style="padding:4px 10px;font-size:12px"
+              hx-post="/htmx/inbox/{{ video.id }}/process"
+              hx-target="#inbox-row-{{ video.id }}"
+              hx-swap="outerHTML">&#9654; Process</button>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;margin-left:4px"
+              hx-delete="/htmx/inbox/{{ video.id }}"
+              hx-target="#inbox-row-{{ video.id }}"
+              hx-swap="outerHTML">&#x2715; Dismiss</button>
+    {% endif %}
+  </td>
+</tr>

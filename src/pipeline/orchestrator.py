@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import Database
 from src.core.exceptions import (
     DownloadError,
+    InvalidStatusTransitionError,
     SummarizationError,
     TranscriptionError,
 )
@@ -50,6 +51,26 @@ class PipelineOrchestrator:
         self._summarizer = summarizer
         self._audio_cache_dir = Path(audio_cache_dir)
         self._dedup = dedup_service
+
+    async def process_video_by_id(self, session: AsyncSession, video_id: int):
+        """Process an already-registered video that is in 'discovered' state.
+
+        Raises VideoNotFoundError if the video does not exist.
+        Raises InvalidStatusTransitionError if the video is not in 'discovered' status.
+        """
+        video = await self._db.get_video_by_id(session, video_id)
+        if video.status != VideoStatus.DISCOVERED.value:
+            raise InvalidStatusTransitionError(
+                f"Video id={video_id} has status={video.status!r}; "
+                f"only 'discovered' videos can be triggered for processing"
+            )
+        video = await self._run_download(session, video_id, video.canonical_url)
+        if video.status == VideoStatus.FAILED.value:
+            return video
+        video = await self._run_transcription(session, video_id)
+        if video.status == VideoStatus.FAILED.value:
+            return video
+        return await self._run_summarization(session, video_id)
 
     async def process_url(
         self,
