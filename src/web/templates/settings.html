@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Settings — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<h1 class="page-title">Settings</h1>
+
+<div class="card" style="margin-bottom:24px">
+  <div class="card-header">Configuration</div>
+  <div style="padding:20px">
+    <p class="text-muted" style="margin-bottom:16px">
+      Runtime configuration is loaded from <code>config/config.yaml</code> (or the file specified
+      at startup). Edit it directly and restart the service to apply changes.
+    </p>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:8px 0;border-bottom:1px solid var(--border)">Setting</th>
+          <th style="text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid var(--border)">Supported Platforms</td>
+          <td style="padding:8px 12px;border-bottom:1px solid var(--border)">YouTube, Instagram, TikTok, Facebook</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid var(--border)">Transcription Engine</td>
+          <td style="padding:8px 12px;border-bottom:1px solid var(--border)">faster-whisper (CPU)</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;border-bottom:1px solid var(--border)">Summarization Engine</td>
+          <td style="padding:8px 12px;border-bottom:1px solid var(--border)">LiteLLM → Ollama</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0">API Version</td>
+          <td style="padding:8px 12px">0.1.0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Danger Zone</div>
+  <div style="padding:20px">
+    <p class="text-muted" style="margin-bottom:12px">
+      Bulk audio deletion frees disk space. Transcripts and summaries are preserved.
+    </p>
+    <a href="/videos" class="btn btn-danger">Manage audio files →</a>
+  </div>
+</div>
+{% endblock %}

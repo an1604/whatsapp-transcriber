@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import AsyncIterator, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, select
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -201,6 +201,88 @@ class Database:
         stmt = stmt.order_by(VideoORM.created_at.desc()).limit(limit).offset(offset)
         result = await session.execute(stmt)
         return list(result.scalars().all())
+
+    async def search_videos(
+        self,
+        session: AsyncSession,
+        query: str,
+        limit: int = 25,
+        offset: int = 0,
+    ) -> list[VideoORM]:
+        """Full-text LIKE search across canonical_url, transcript, and summary."""
+        if not query or not query.strip():
+            raise ValueError("search query must not be empty")
+        if limit < 1 or limit > 200:
+            raise ValueError(f"limit must be between 1 and 200, got {limit}")
+        if offset < 0:
+            raise ValueError(f"offset must be >= 0, got {offset}")
+        pattern = f"%{query.strip()}%"
+        stmt = (
+            select(VideoORM)
+            .where(
+                or_(
+                    VideoORM.canonical_url.like(pattern),
+                    VideoORM.transcript.like(pattern),
+                    VideoORM.summary.like(pattern),
+                )
+            )
+            .order_by(VideoORM.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def bulk_mark_audio_deleted(
+        self,
+        session: AsyncSession,
+        video_ids: list[int],
+    ) -> int:
+        """Mark audio as deleted for multiple videos at once.
+
+        Returns the number of rows updated. Raises ValueError for empty list.
+        Silently skips IDs that don't exist.
+        """
+        if not video_ids:
+            raise ValueError("video_ids must not be empty")
+        stmt = (
+            update(VideoORM)
+            .where(VideoORM.id.in_(video_ids))
+            .values(audio_deleted=True, audio_path=None, updated_at=_utcnow())
+            .execution_options(synchronize_session="fetch")
+        )
+        result = await session.execute(stmt)
+        await session.commit()
+        return result.rowcount
+
+    async def get_disk_stats(self, session: AsyncSession) -> dict[str, int]:
+        """Return aggregate counts for disk/audio state.
+
+        Returns a dict with:
+        - videos_with_audio: videos that have an audio file on disk
+        - videos_audio_deleted: videos whose audio was deleted
+        - videos_without_audio: videos that never had audio (no audio_path)
+        """
+        from sqlalchemy import func, case
+
+        stmt = select(
+            func.count().label("total"),
+            func.sum(
+                case((VideoORM.audio_path.is_not(None) & ~VideoORM.audio_deleted, 1), else_=0)
+            ).label("with_audio"),
+            func.sum(
+                case((VideoORM.audio_deleted == True, 1), else_=0)  # noqa: E712
+            ).label("audio_deleted"),
+        )
+        row = (await session.execute(stmt)).one()
+        total = row.total or 0
+        with_audio = int(row.with_audio or 0)
+        audio_deleted = int(row.audio_deleted or 0)
+        return {
+            "videos_with_audio": with_audio,
+            "videos_audio_deleted": audio_deleted,
+            "videos_without_audio": total - with_audio - audio_deleted,
+        }
 
     # ------------------------------------------------------------------
     # Job operations

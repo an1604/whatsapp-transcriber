@@ -1,4 +1,5 @@
 <tr>
+  <td><input type="checkbox" name="video_ids" value="{{ video.id }}"></td>
   <td><a href="/videos/{{ video.id }}">{{ video.id }}</a></td>
   <td class="truncate mono">
     <a href="/videos/{{ video.id }}" title="{{ video.canonical_url }}">{{ video.canonical_url | truncate(60) }}</a>

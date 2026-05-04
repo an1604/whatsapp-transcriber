@@ -60,3 +60,8 @@ async def submit_page(request: Request):
 @router.get("/jobs", response_class=HTMLResponse)
 async def jobs_page(request: Request):
     return templates.TemplateResponse(request, "jobs.html", {})
+
+
+@router.get("/settings", response_class=HTMLResponse)
+async def settings_page(request: Request):
+    return templates.TemplateResponse(request, "settings.html", {})
