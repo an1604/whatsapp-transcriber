@@ -1,0 +1,40 @@
+whatsapp:
+  sidecar_url: http://localhost:3000
+  community_ids: []
+  scrape_interval_minutes: 60
+
+platforms:
+  enabled:
+    - youtube
+    - instagram
+    - tiktok
+    - facebook
+
+transcriber:
+  type: faster_whisper
+  params:
+    model_size: small
+    device: cpu
+    compute_type: int8
+    language: auto
+
+summarizer:
+  type: litellm
+  params:
+    model: ollama/llama3.1:8b
+    api_base: http://localhost:11434
+    temperature: 0.3
+  prompt_path: config/prompts/summarize_default.txt
+
+deduplication:
+  enabled: true
+  resolve_redirects: true
+
+storage:
+  database_url: sqlite+aiosqlite:///data/app.db
+  audio_cache_dir: data/audio_cache
+  audio_retention_days: null   # null = keep until user deletes
+
+web:
+  host: 0.0.0.0
+  port: 8000
