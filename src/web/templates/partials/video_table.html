@@ -1,0 +1,32 @@
+{% if videos %}
+<table>
+  <thead>
+    <tr>
+      <th>ID</th><th>URL</th><th>Platform</th><th>Status</th><th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for video in videos %}
+      {% include "partials/video_row.html" %}
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted" style="padding:20px 0">No videos found.</p>
+{% endif %}
+{% if show_pagination %}
+<div class="pagination">
+  {% if offset > 0 %}
+    <button class="pager"
+            hx-get="/htmx/videos/table?limit={{ limit }}&offset={{ [offset - limit, 0] | max }}{% if platform %}&platform={{ platform }}{% endif %}{% if status %}&status={{ status }}{% endif %}"
+            hx-target="#video-table"
+            hx-swap="innerHTML">← Prev</button>
+  {% endif %}
+  {% if videos | length == limit %}
+    <button class="pager"
+            hx-get="/htmx/videos/table?limit={{ limit }}&offset={{ offset + limit }}{% if platform %}&platform={{ platform }}{% endif %}{% if status %}&status={{ status }}{% endif %}"
+            hx-target="#video-table"
+            hx-swap="innerHTML">Next →</button>
+  {% endif %}
+</div>
+{% endif %}

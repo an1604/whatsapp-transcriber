@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Videos — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center" style="margin-bottom:24px">
+  <h1 class="page-title" style="margin:0">Videos</h1>
+  <a href="/submit" class="btn btn-primary">➕ Submit URL</a>
+</div>
+
+<div class="filters">
+  <select id="filter-platform" name="platform"
+          hx-get="/htmx/videos/table"
+          hx-target="#video-table"
+          hx-include="#filter-platform,#filter-status"
+          hx-trigger="change">
+    <option value="">All platforms</option>
+    <option value="youtube"   {% if platform == "youtube"   %}selected{% endif %}>YouTube</option>
+    <option value="instagram" {% if platform == "instagram" %}selected{% endif %}>Instagram</option>
+    <option value="tiktok"    {% if platform == "tiktok"    %}selected{% endif %}>TikTok</option>
+    <option value="facebook"  {% if platform == "facebook"  %}selected{% endif %}>Facebook</option>
+  </select>
+
+  <select id="filter-status" name="status"
+          hx-get="/htmx/videos/table"
+          hx-target="#video-table"
+          hx-include="#filter-platform,#filter-status"
+          hx-trigger="change">
+    <option value="">All statuses</option>
+    <option value="discovered"  {% if status == "discovered"  %}selected{% endif %}>Queued</option>
+    <option value="downloading" {% if status == "downloading" %}selected{% endif %}>Downloading</option>
+    <option value="downloaded"  {% if status == "downloaded"  %}selected{% endif %}>Downloaded</option>
+    <option value="transcribing"{% if status == "transcribing"%}selected{% endif %}>Transcribing</option>
+    <option value="transcribed" {% if status == "transcribed" %}selected{% endif %}>Transcribed</option>
+    <option value="summarizing" {% if status == "summarizing" %}selected{% endif %}>Summarizing</option>
+    <option value="complete"    {% if status == "complete"    %}selected{% endif %}>Complete</option>
+    <option value="failed"      {% if status == "failed"      %}selected{% endif %}>Failed</option>
+  </select>
+</div>
+
+<div class="card">
+  <div id="video-table"
+       hx-get="/htmx/videos/table?limit=25&offset=0{% if platform %}&platform={{ platform }}{% endif %}{% if status %}&status={{ status }}{% endif %}"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    <p class="text-muted">Loading…</p>
+  </div>
+</div>
+{% endblock %}

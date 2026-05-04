@@ -1,0 +1,22 @@
+<div class="stats" hx-get="/htmx/dashboard/stats" hx-trigger="every 10s" hx-swap="outerHTML">
+  <div class="stat">
+    <div class="stat-val">{{ stats.total_videos }}</div>
+    <div class="stat-label">Total Videos</div>
+  </div>
+  <div class="stat complete">
+    <div class="stat-val">{{ stats.complete }}</div>
+    <div class="stat-label">Complete</div>
+  </div>
+  <div class="stat progress">
+    <div class="stat-val">{{ stats.in_progress }}</div>
+    <div class="stat-label">In Progress</div>
+  </div>
+  <div class="stat failed">
+    <div class="stat-val">{{ stats.failed }}</div>
+    <div class="stat-label">Failed</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">{{ stats.discovered }}</div>
+    <div class="stat-label">Queued</div>
+  </div>
+</div>

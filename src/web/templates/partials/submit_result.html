@@ -1,0 +1,15 @@
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% elif result %}
+  {% if result.is_duplicate %}
+  <div class="alert alert-info">
+    ℹ️ Already in queue — <a href="/videos/{{ result.video_id }}">View video #{{ result.video_id }}</a>
+    <br><span class="text-muted mono" style="font-size:11px">{{ result.canonical_url }}</span>
+  </div>
+  {% else %}
+  <div class="alert alert-success">
+    ✅ Queued for processing — <a href="/videos/{{ result.video_id }}">View video #{{ result.video_id }}</a>
+    <br><span class="mono" style="font-size:11px">{{ result.canonical_url }}</span>
+  </div>
+  {% endif %}
+{% endif %}

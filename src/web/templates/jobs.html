@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Jobs — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<h1 class="page-title">Job Queue</h1>
+
+<div class="card">
+  <div class="card-header flex justify-between items-center">
+    Recent Jobs
+    <button class="btn btn-ghost" style="font-size:12px"
+            hx-get="/htmx/jobs/recent"
+            hx-target="#jobs-table"
+            hx-swap="innerHTML">↻ Refresh</button>
+  </div>
+  <div id="jobs-table"
+       hx-get="/htmx/jobs/recent"
+       hx-trigger="load, every 5s"
+       hx-swap="innerHTML">
+    <p class="text-muted">Loading…</p>
+  </div>
+</div>
+{% endblock %}

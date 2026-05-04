@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Video #{{ video.id }} — WhatsApp Transcriber{% endblock %}
+{% block content %}
+<div class="flex items-center gap-2" style="margin-bottom:24px">
+  <a href="/videos" class="btn btn-ghost">← Back</a>
+  <h1 class="page-title" style="margin:0">Video #{{ video.id }}</h1>
+  <span class="badge {% if video.status == 'complete' %}badge-complete{% elif video.status == 'failed' %}badge-failed{% elif video.status == 'discovered' %}badge-discovered{% else %}badge-progress{% endif %}">
+    {{ video.status }}
+  </span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
+  <div class="card">
+    <div class="card-header">Details</div>
+    <table>
+      <tr><td class="text-muted" style="width:120px">Platform</td><td><span class="badge badge-platform">{{ video.platform }}</span></td></tr>
+      <tr><td class="text-muted">Language</td><td>{{ video.detected_language or "—" }}</td></tr>
+      <tr><td class="text-muted">Source group</td><td>{{ video.source_group or "—" }}</td></tr>
+      <tr><td class="text-muted">Created</td><td class="mono">{{ video.created_at[:19] if video.created_at else "—" }}</td></tr>
+      <tr><td class="text-muted">Completed</td><td class="mono">{{ video.completed_at[:19] if video.completed_at else "—" }}</td></tr>
+      <tr><td class="text-muted">Audio</td>
+          <td>
+            {% if video.audio_deleted %}
+              <span class="text-muted">Deleted</span>
+            {% elif video.audio_path %}
+              <span class="mono" style="font-size:11px">{{ video.audio_path }}</span>
+              <button class="btn btn-danger" style="margin-top:8px;font-size:12px"
+                      hx-delete="/htmx/videos/{{ video.id }}/audio"
+                      hx-confirm="Delete the audio file? The transcript and summary will be kept."
+                      hx-target="closest tr td:last-child"
+                      hx-swap="innerHTML">
+                🗑 Delete audio
+              </button>
+            {% else %}
+              <span class="text-muted">Not available</span>
+            {% endif %}
+          </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header">URL</div>
+    <p class="mono" style="word-break:break-all;font-size:12px;margin-bottom:8px">{{ video.canonical_url }}</p>
+    <a href="{{ video.canonical_url }}" target="_blank" class="btn btn-ghost" style="font-size:12px">↗ Open original</a>
+    {% if video.error_message %}
+    <div class="alert alert-error" style="margin-top:12px">
+      <strong>Error:</strong> {{ video.error_message }}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if video.summary %}
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header">Summary</div>
+  <p style="white-space:pre-wrap;line-height:1.8">{{ video.summary }}</p>
+</div>
+{% endif %}
+
+{% if video.transcript %}
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header flex justify-between items-center">
+    Transcript
+    <span class="text-muted" style="font-size:11px">{{ video.transcript | length }} chars</span>
+  </div>
+  <div class="transcript-block">{{ video.transcript }}</div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">Pipeline Jobs</div>
+  <div hx-get="/htmx/jobs/video/{{ video.id }}"
+       hx-trigger="load"
+       hx-swap="innerHTML">
+    <p class="text-muted">Loading…</p>
+  </div>
+</div>
+{% endblock %}

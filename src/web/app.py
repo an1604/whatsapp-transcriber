@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.database import Database
 from src.web.dependencies import set_database
-from src.web.routes import dashboard, jobs, submit, videos
+from src.web.routes import dashboard, htmx, jobs, pages, submit, videos
 
 
 def create_app(
@@ -48,10 +48,14 @@ def create_app(
             allow_headers=["*"],
         )
 
+    # REST API
     app.include_router(dashboard.router)
     app.include_router(videos.router)
     app.include_router(jobs.router)
     app.include_router(submit.router)
+    # HTML pages + HTMX partials
+    app.include_router(pages.router)
+    app.include_router(htmx.router)
 
     @app.get("/health")
     async def health():
