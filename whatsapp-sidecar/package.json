@@ -1,0 +1,19 @@
+{
+  "name": "whatsapp-transcriber-sidecar",
+  "version": "1.0.0",
+  "description": "WhatsApp Web.js headless sidecar — receives messages and forwards video URLs to the Python pipeline",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test tests/"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -51,3 +51,11 @@ class JobNotFoundError(WhatsAppTranscriberError):
 
 class AudioNotFoundError(WhatsAppTranscriberError):
     """Raised when an audio file is expected on disk but does not exist."""
+
+
+class SidecarError(WhatsAppTranscriberError):
+    """Raised when communication with the WhatsApp Node.js sidecar fails."""
+
+
+class SidecarNotReadyError(SidecarError):
+    """Raised when the sidecar is up but WhatsApp is not yet authenticated."""

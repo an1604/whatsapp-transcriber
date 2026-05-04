@@ -134,6 +134,75 @@ class TestDockerComposeFile:
         compose = _load_compose()
         assert "restart" in compose["services"]["ollama"]
 
+    def test_has_whatsapp_sidecar_service(self):
+        compose = _load_compose()
+        assert "whatsapp-sidecar" in compose["services"]
+
+    def test_sidecar_exposes_port_3000(self):
+        compose = _load_compose()
+        ports = compose["services"]["whatsapp-sidecar"].get("ports", [])
+        assert any("3000" in str(p) for p in ports)
+
+    def test_sidecar_depends_on_app(self):
+        compose = _load_compose()
+        depends = compose["services"]["whatsapp-sidecar"].get("depends_on", [])
+        if isinstance(depends, dict):
+            assert "app" in depends
+        else:
+            assert "app" in depends
+
+    def test_sidecar_mounts_wa_session_volume(self):
+        compose = _load_compose()
+        vols = compose["services"]["whatsapp-sidecar"].get("volumes", [])
+        assert any("wa_session" in str(v) for v in vols)
+
+    def test_wa_session_volume_defined(self):
+        compose = _load_compose()
+        assert "wa_session" in compose["volumes"]
+
+    def test_sidecar_has_pipeline_url_env(self):
+        compose = _load_compose()
+        env = compose["services"]["whatsapp-sidecar"].get("environment", {})
+        if isinstance(env, list):
+            keys = [e.split("=")[0] for e in env]
+        else:
+            keys = list(env.keys())
+        assert "PIPELINE_URL" in keys
+
+
+# ---------------------------------------------------------------------------
+# Sidecar Dockerfile structure
+# ---------------------------------------------------------------------------
+
+SIDECAR_DOCKERFILE = ROOT / "whatsapp-sidecar" / "Dockerfile"
+
+
+class TestSidecarDockerfile:
+    def _content(self) -> str:
+        return SIDECAR_DOCKERFILE.read_text(encoding="utf-8")
+
+    def test_file_exists(self):
+        assert SIDECAR_DOCKERFILE.exists()
+
+    def test_uses_node_base_image(self):
+        assert "node:" in self._content().lower()
+
+    def test_exposes_port_3000(self):
+        assert "EXPOSE 3000" in self._content()
+
+    def test_has_healthcheck(self):
+        assert "HEALTHCHECK" in self._content()
+
+    def test_has_cmd(self):
+        assert "CMD" in self._content()
+
+    def test_has_volume_for_wa_session(self):
+        assert "VOLUME" in self._content()
+
+    def test_copies_src_directory(self):
+        content = self._content()
+        assert "COPY src/" in content or "COPY src " in content
+
 
 # ---------------------------------------------------------------------------
 # Dockerfile structure
