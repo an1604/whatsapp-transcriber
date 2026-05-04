@@ -14,12 +14,12 @@
 | 4 | LiteLLM summarizer + prompt loader | `feature/step-4-summarizer` | #4 | ✅ Merged to dev | 51 |
 | 5 | Pipeline orchestrator + dedup + job queue | `feature/step-5-pipeline` | #5 | ✅ Merged to dev | 45 |
 | 6 | FastAPI REST API | `feature/step-6-web-ui` | #6 | ✅ Merged to dev | 49 |
-| 7 | HTMX + Jinja2 frontend | `feature/step-7-htmx-ui` | — | 🔄 In progress | — |
+| 7 | HTMX + Jinja2 frontend | `feature/step-7-htmx-ui` | #7 | ✅ Merged to dev | 59 |
 | 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | — | ⬜ Pending | — |
 | 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | — | ⬜ Pending | — |
 | 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | — | ⬜ Pending | — |
 
-**Total tests on dev: 514 (all passing)**
+**Total tests on dev: 573 (all passing)**
 
 ---
 
@@ -57,17 +57,10 @@
 - `src/web/routes/dashboard.py` — `GET /api/dashboard` (aggregate counts)
 - `src/web/routes/submit.py` — `POST /api/submit` (manual URL, dedup-aware, 422 on bad URL)
 
+### Step 7 — HTMX + Jinja2 Frontend
+- `src/web/routes/pages.py` — 5 full-page routes (`/`, `/videos`, `/videos/{id}`, `/submit`, `/jobs`)
+- `src/web/routes/htmx.py` — 8 HTMX partial endpoints (stats, video table w/ filter+pagination, delete audio, jobs, submit form)
+- `src/web/templates/` — `base.html` dark-theme layout + 5 pages + 5 partials + 404
+- Pagination Prev/Next, status badges, platform filters, auto-poll every 5–10 s via HTMX
+
 ---
-
-## Upcoming: Step 7 — HTMX + Jinja2 Frontend
-
-**Goal**: A fully usable browser UI without needing the WhatsApp sidecar.
-
-Pages planned:
-- `/` — Dashboard (queue depth, recent videos, disk usage)
-- `/videos` — Paginated video list with platform/status filters
-- `/videos/{id}` — Video detail (transcript, summary, audio delete button)
-- `/submit` — Manual URL submission form
-- `/jobs` — Job queue view
-
-Tech: Jinja2 templates, HTMX for partial page updates (no full-page reloads), minimal vanilla CSS.

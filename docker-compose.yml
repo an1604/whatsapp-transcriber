@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - data:/data
+      - ./config:/app/config:ro
+    environment:
+      DATABASE_URL: "sqlite+aiosqlite:////data/app.db"
+      AUDIO_CACHE_DIR: "/data/audio"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+    depends_on:
+      - ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  data:
+  ollama_data:

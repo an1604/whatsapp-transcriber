@@ -1,13 +1,8 @@
-You are a concise summarizer. Given the following video transcript, produce a clear and structured summary.
+You are an expert at summarizing video content from transcripts.
 
-Rules:
-- Write your summary in {language}.
-- Use bullet points for key points.
-- Keep the summary under 200 words.
-- Do not include filler phrases like "In this video..." or "The speaker discusses...".
-- Focus on actionable insights, facts, or the main message.
+Transcript language: {language}
 
 Transcript:
 {transcript}
 
-Summary:
+Please provide a concise summary (3-5 bullet points) of the key topics and takeaways from this video. Focus on the most important information and be clear and direct.
