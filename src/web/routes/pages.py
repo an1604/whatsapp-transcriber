@@ -62,6 +62,11 @@ async def jobs_page(request: Request):
     return templates.TemplateResponse(request, "jobs.html", {})
 
 
+@router.get("/inbox", response_class=HTMLResponse)
+async def inbox_page(request: Request):
+    return templates.TemplateResponse(request, "inbox.html", {})
+
+
 @router.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
     return templates.TemplateResponse(request, "settings.html", {})

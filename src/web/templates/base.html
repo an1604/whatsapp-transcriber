@@ -116,6 +116,7 @@
     <div class="nav-logo">📱 Transcriber<span>WhatsApp Video AI</span></div>
     <ul>
       <li><a href="/" class="{% if request.url.path == '/' %}active{% endif %}">🏠 Dashboard</a></li>
+      <li><a href="/inbox" class="{% if request.url.path == '/inbox' %}active{% endif %}">📥 Inbox</a></li>
       <li><a href="/videos" class="{% if request.url.path.startswith('/videos') %}active{% endif %}">🎬 Videos</a></li>
       <li><a href="/submit" class="{% if request.url.path == '/submit' %}active{% endif %}">➕ Submit URL</a></li>
       <li><a href="/jobs" class="{% if request.url.path == '/jobs' %}active{% endif %}">⚙️ Jobs</a></li>

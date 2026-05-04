@@ -1,0 +1,40 @@
+{% if videos %}
+<table>
+  <thead>
+    <tr>
+      <th style="width:32px"><input type="checkbox" id="inbox-select-all"
+           onchange="document.querySelectorAll('input[name=video_ids]').forEach(cb => cb.checked = this.checked)"></th>
+      <th>Platform</th>
+      <th>URL</th>
+      <th>Group</th>
+      <th>Received</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for video in videos %}
+      {% set queued = false %}
+      {% include "partials/inbox_row.html" %}
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted" style="padding:20px 0">Inbox is empty — no videos awaiting review.</p>
+{% endif %}
+
+{% if total > limit %}
+<div class="pagination">
+  {% if offset > 0 %}
+    <button class="pager"
+            hx-get="/htmx/inbox?limit={{ limit }}&offset={{ [offset - limit, 0] | max }}"
+            hx-target="#inbox-table"
+            hx-swap="innerHTML">&#8592; Prev</button>
+  {% endif %}
+  {% if offset + limit < total %}
+    <button class="pager"
+            hx-get="/htmx/inbox?limit={{ limit }}&offset={{ offset + limit }}"
+            hx-target="#inbox-table"
+            hx-swap="innerHTML">Next &#8594;</button>
+  {% endif %}
+</div>
+{% endif %}

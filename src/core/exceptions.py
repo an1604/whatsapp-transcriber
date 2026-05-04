@@ -59,3 +59,11 @@ class SidecarError(WhatsAppTranscriberError):
 
 class SidecarNotReadyError(SidecarError):
     """Raised when the sidecar is up but WhatsApp is not yet authenticated."""
+
+
+class PipelineNotConfiguredError(WhatsAppTranscriberError):
+    """Raised when a pipeline operation is attempted but no orchestrator is wired in."""
+
+
+class VideoAlreadyProcessingError(WhatsAppTranscriberError):
+    """Raised when attempting to process a video that is not in 'discovered' status."""

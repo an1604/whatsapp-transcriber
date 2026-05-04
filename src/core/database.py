@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import AsyncIterator, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, or_, select, update
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, delete as sql_delete, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -254,6 +254,67 @@ class Database:
         result = await session.execute(stmt)
         await session.commit()
         return result.rowcount
+
+    async def delete_video(self, session: AsyncSession, video_id: int) -> None:
+        """Hard-delete a video and its jobs.
+
+        Raises VideoNotFoundError if the video does not exist.
+        Jobs are deleted explicitly first to avoid relying on SQLite FK cascade.
+        """
+        await self.get_video_by_id(session, video_id)  # raises if missing
+        await session.execute(sql_delete(JobORM).where(JobORM.video_id == video_id))
+        await session.execute(sql_delete(VideoORM).where(VideoORM.id == video_id))
+        await session.commit()
+
+    async def bulk_delete_videos(
+        self,
+        session: AsyncSession,
+        video_ids: list[int],
+    ) -> int:
+        """Hard-delete multiple videos and their jobs.
+
+        Returns count of deleted video rows. Raises ValueError for empty list.
+        Silently skips IDs that do not exist.
+        """
+        if not video_ids:
+            raise ValueError("video_ids must not be empty")
+        await session.execute(sql_delete(JobORM).where(JobORM.video_id.in_(video_ids)))
+        result = await session.execute(
+            sql_delete(VideoORM).where(VideoORM.id.in_(video_ids))
+        )
+        await session.commit()
+        return result.rowcount
+
+    async def list_inbox_videos(
+        self,
+        session: AsyncSession,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[VideoORM]:
+        """Return videos in 'discovered' status, newest first (the inbox)."""
+        if limit < 1 or limit > 500:
+            raise ValueError(f"limit must be between 1 and 500, got {limit}")
+        if offset < 0:
+            raise ValueError(f"offset must be >= 0, got {offset}")
+        stmt = (
+            select(VideoORM)
+            .where(VideoORM.status == VideoStatus.DISCOVERED.value)
+            .order_by(VideoORM.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def count_inbox_videos(self, session: AsyncSession) -> int:
+        """Count videos currently in 'discovered' state."""
+        from sqlalchemy import func
+        stmt = (
+            select(func.count())
+            .select_from(VideoORM)
+            .where(VideoORM.status == VideoStatus.DISCOVERED.value)
+        )
+        return (await session.execute(stmt)).scalar_one()
 
     async def get_disk_stats(self, session: AsyncSession) -> dict[str, int]:
         """Return aggregate counts for disk/audio state.
