@@ -15,11 +15,11 @@
 | 5 | Pipeline orchestrator + dedup + job queue | `feature/step-5-pipeline` | #5 | ✅ Merged to dev | 45 |
 | 6 | FastAPI REST API | `feature/step-6-web-ui` | #6 | ✅ Merged to dev | 49 |
 | 7 | HTMX + Jinja2 frontend | `feature/step-7-htmx-ui` | #7 | ✅ Merged to dev | 59 |
-| 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | — | ⬜ Pending | — |
+| 8 | Docker Compose (app + Ollama) | `feature/step-8-docker` | #8 | ✅ Merged to dev | 70 |
 | 9 | WhatsApp Node.js sidecar | `feature/step-9-whatsapp-sidecar` | — | ⬜ Pending | — |
 | 10 | Polish (search, bulk delete, settings UI) | `feature/step-10-polish` | — | ⬜ Pending | — |
 
-**Total tests on dev: 573 (all passing)**
+**Total tests on dev: 643 (all passing)**
 
 ---
 
@@ -56,6 +56,14 @@
 - `src/web/routes/jobs.py` — `GET /api/jobs/video/{id}`, `GET /api/jobs/{id}`
 - `src/web/routes/dashboard.py` — `GET /api/dashboard` (aggregate counts)
 - `src/web/routes/submit.py` — `POST /api/submit` (manual URL, dedup-aware, 422 on bad URL)
+
+### Step 8 — Docker Compose
+- `Dockerfile` — multi-stage build: builder (pip wheels) + runtime (ffmpeg, app code)
+- `docker-compose.yml` — `app` + `ollama` services, named volumes, healthchecks, restart policies
+- `scripts/entrypoint.sh` — waits for Ollama readiness before starting uvicorn
+- `config/config.docker.yaml` — Docker-targeted config (Ollama service name, /data volume paths)
+- `src/core/config.py` — `load_config_with_env_overrides()` for 12-factor deployments
+  Supported: DATABASE_URL, AUDIO_CACHE_DIR, OLLAMA_BASE_URL, WEB_HOST, WEB_PORT, WHISPER_MODEL_SIZE
 
 ### Step 7 — HTMX + Jinja2 Frontend
 - `src/web/routes/pages.py` — 5 full-page routes (`/`, `/videos`, `/videos/{id}`, `/submit`, `/jobs`)
