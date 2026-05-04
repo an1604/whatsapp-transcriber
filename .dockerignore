@@ -1,0 +1,12 @@
+.git
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+data/
+tests/
+plan.md
+PROGRESS.md
+*.md
+.gitignore

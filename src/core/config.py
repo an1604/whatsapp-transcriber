@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -150,6 +151,86 @@ class AppConfig(BaseModel):
     deduplication: DeduplicationConfig
     storage: StorageConfig
     web: WebConfig
+
+
+# ---------------------------------------------------------------------------
+# Environment variable override support (for Docker / 12-factor deployments)
+# ---------------------------------------------------------------------------
+
+# Maps env var name → dotted path into the raw config dict.
+# Leaf values are always strings from the environment; int coercion happens
+# for fields whose last key is "port" or "scrape_interval_minutes".
+_ENV_OVERRIDE_MAP: dict[str, tuple[str, ...]] = {
+    "DATABASE_URL": ("storage", "database_url"),
+    "AUDIO_CACHE_DIR": ("storage", "audio_cache_dir"),
+    "OLLAMA_BASE_URL": ("summarizer", "params", "api_base"),
+    "WEB_HOST": ("web", "host"),
+    "WEB_PORT": ("web", "port"),
+    "WHISPER_MODEL_SIZE": ("transcriber", "params", "model_size"),
+}
+
+_INT_LEAF_KEYS: frozenset[str] = frozenset({"port", "scrape_interval_minutes"})
+
+
+def _apply_env_overrides(raw: dict, env: dict[str, str]) -> None:
+    """Mutate *raw* in-place, applying every matching env var override."""
+    for env_key, path in _ENV_OVERRIDE_MAP.items():
+        if env_key not in env:
+            continue
+        value_str = env[env_key].strip()
+        node = raw
+        for part in path[:-1]:
+            node = node.setdefault(part, {})
+        leaf_key = path[-1]
+        if leaf_key in _INT_LEAF_KEYS:
+            try:
+                node[leaf_key] = int(value_str)
+            except ValueError:
+                raise ConfigurationError(
+                    f"Environment variable {env_key} must be an integer, got {value_str!r}"
+                )
+        else:
+            node[leaf_key] = value_str
+
+
+def load_config_with_env_overrides(
+    config_path: Path,
+    env: dict[str, str] | None = None,
+) -> AppConfig:
+    """Load config from *config_path* and apply environment variable overrides.
+
+    ``env`` defaults to ``os.environ`` when *None*. Pass an explicit mapping in
+    tests to avoid touching the real environment.
+
+    Raises ConfigurationError for any problem — same contract as load_config().
+    """
+    if env is None:
+        env = dict(os.environ)
+
+    if not config_path.exists():
+        raise ConfigurationError(f"Config file not found: {config_path}")
+    if not config_path.is_file():
+        raise ConfigurationError(f"Config path is not a file: {config_path}")
+
+    try:
+        raw = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise ConfigurationError(
+            f"Invalid YAML in config file {config_path}: {exc}"
+        ) from exc
+
+    if not isinstance(raw, dict):
+        raise ConfigurationError(
+            f"Config file must contain a YAML mapping at the top level, "
+            f"got {type(raw).__name__!r}"
+        )
+
+    _apply_env_overrides(raw, env)
+
+    try:
+        return AppConfig.model_validate(raw)
+    except Exception as exc:
+        raise ConfigurationError(f"Config validation failed: {exc}") from exc
 
 
 def load_config(config_path: Path) -> AppConfig:
